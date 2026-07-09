@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b511d67b-9765-4884-8631-1a7707786f38" name="Changes" comment="commit init by ENGR. IPAYE" />
+    <list default="true" id="b511d67b-9765-4884-8631-1a7707786f38" name="Changes" comment="backend dev commit by ENGR. IPAYE">
+      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/injuries.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/injuries.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -25,6 +29,65 @@
     "accountId": "62f3c800-73e6-420b-aa58-683575fb5b32"
   }
 }]]></component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.6930367720942827E-77" />
+      <entry key="MS500" value="6.087494310973354E-16" />
+      <entry key="S2" value="2.5866421322059486E-4" />
+      <entry key="S5" value="0.0555835733815546" />
+      <entry key="S10" value="0.3333190606677602" />
+      <entry key="S30" value="1.1005545614387693" />
+      <entry key="S60" value="1.4839952558509217" />
+      <entry key="M2" value="1.7778224821615183" />
+      <entry key="M5" value="3.435698519052008" />
+      <entry key="M10" value="7.90372646684659" />
+      <entry key="M15" value="11.651419306787727" />
+      <entry key="M30" value="18.01858224296533" />
+      <entry key="H1" value="22.75707846471505" />
+      <entry key="H2" value="25.662505463727417" />
+      <entry key="H4" value="27.273278254887867" />
+      <entry key="D1" value="28.70379998322191" />
+      <entry key="W1" value="28.957474795521374" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0" />
+      <entry key="S10" value="1.0" />
+      <entry key="S30" value="1.0000000034312218" />
+      <entry key="S60" value="1.0000586586855722" />
+      <entry key="M2" value="1.007940085161706" />
+      <entry key="M5" value="1.1806834182238055" />
+      <entry key="M10" value="1.5730066897252977" />
+      <entry key="M15" value="1.8592115115086059" />
+      <entry key="M30" value="2.3031586750966397" />
+      <entry key="H1" value="2.611999868540658" />
+      <entry key="H2" value="2.7948779096663325" />
+      <entry key="H4" value="2.8944876604168384" />
+      <entry key="D1" value="2.981989319247253" />
+      <entry key="W1" value="2.997416423334222" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="0.002879432065021682" />
+      <entry key="MS500" value="0.31035687288152863" />
+      <entry key="S2" value="0.7466316863936521" />
+      <entry key="S5" value="0.9436091422646911" />
+      <entry key="S10" value="1.2716517762584771" />
+      <entry key="S30" value="2.075779319920962" />
+      <entry key="S60" value="2.4706435685989674" />
+      <entry key="M2" value="2.7785838309058195" />
+      <entry key="M5" value="4.612042329664552" />
+      <entry key="M10" value="9.47297465715953" />
+      <entry key="M15" value="13.507355537173538" />
+      <entry key="M30" value="20.319506798523104" />
+      <entry key="H1" value="25.367753813978492" />
+      <entry key="H2" value="28.456659685710253" />
+      <entry key="H4" value="30.167387340977943" />
+      <entry key="D1" value="31.685723757147155" />
+      <entry key="W1" value="31.954881793539023" />
+    </decayedShown>
+  </component>
   <component name="ProjectColorInfo"><![CDATA[{
   "associatedIndex": 3,
   "fromUser": false
@@ -50,6 +113,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
     "to.speed.mode.migration.done": "true",
     "vue.rearranger.settings.migration": "true"
   }
@@ -68,7 +132,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1783607003848</updated>
-      <workItem from="1783607004650" duration="679000" />
+      <workItem from="1783607004650" duration="3501000" />
     </task>
     <task id="LOCAL-00001" summary="commit init by ENGR. IPAYE">
       <option name="closed" value="true" />
@@ -78,7 +142,15 @@
       <option name="project" value="LOCAL" />
       <updated>1783607348264</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="backend dev commit by ENGR. IPAYE">
+      <option name="closed" value="true" />
+      <created>1783607719915</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1783607719915</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -86,7 +158,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="commit init by ENGR. IPAYE" />
-    <option name="LAST_COMMIT_MESSAGE" value="commit init by ENGR. IPAYE" />
+    <MESSAGE value="backend dev commit by ENGR. IPAYE" />
+    <option name="LAST_COMMIT_MESSAGE" value="backend dev commit by ENGR. IPAYE" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
