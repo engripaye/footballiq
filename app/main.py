@@ -1,12 +1,32 @@
 from fastapi import FastAPI
 
-from app.api.v1.injuries import router as injuries_router
+from app.core.config import settings
+from app.core.database import Base, engine
+from app.api.v1.routes import api_router
 
-app = FastAPI(title="FootballIQ")
+Base.metadata.create_all(bind=engine)
 
-app.include_router(injuries_router, prefix="/api/v1")
+app = FastAPI(
+    title=settings.APP_NAME,
+    description="FootballIQ - AI Football Prediction Intelligence Platform",
+    version="1.0.0"
+)
+
+app.include_router(api_router)
 
 
 @app.get("/")
-def read_root() -> dict[str, str]:
-    return {"status": "ok", "service": "FootballIQ"}
+def root():
+    return {
+        "message": "Welcome to FootballIQ Backend",
+        "docs": "/docs",
+        "status": "running"
+    }
+
+
+@app.get("/health")
+def health_check():
+    return {
+        "status": "healthy",
+        "service": settings.APP_NAME
+    }
