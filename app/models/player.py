@@ -10,4 +10,8 @@ class Player(Base):
     name = Column(String, nullable=False)
     position = Column(String, nullable=False)
 
+    rating = Column(String, nullable=False)
+    fitness_score = Column(Float, nullable=False)
+    is_key_player = Column(Boolean, default=False)
+
 
