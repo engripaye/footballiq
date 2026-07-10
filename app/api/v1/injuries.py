@@ -1,14 +1,22 @@
-from fastapi import APIRouter
-from pydantic_settings import BaseSettings
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+from app.core.database import get_db
+from app.models.injury import Injury
+from app.schemas.injury_schema import InjuryCreate, InjuryResponse
+
+router = APIRouter(prefix="/injuries", tags=["Injuries"])
 
 
-class Settings(BaseSettings):
-    pass
+@router.post("/", response_model=InjuryResponse)
+def create_injury(payload: InjuryCreate, db: Session = Depends(get_db)):
+    injury = Injury(**payload.model_dump())
+    db.add(injury)
+    db.commit()
+    db.refresh(injury)
+    return injury
 
 
-router = APIRouter(prefix="/injuries", tags=["injuries"])
-
-
-@router.get("/")
-def list_injuries() -> dict[str, list[dict[str, str]]]:
-    return {"injuries": []}
+@router.get("/", response_model=list[InjuryResponse])
+def get_injuries(db: Session = Depends(get_db)):
+    return db.query(Injury).all()
