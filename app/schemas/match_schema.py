@@ -5,9 +5,9 @@ from datetime import datetime
 class MatchCreate(BaseModel):
     home_team_id: int
     away_team_id: int
-    league: str | None = None
-    season: str | None = None
-    kickoff_time: datetime | None = None
+    league: str
+    season: str
+    kickoff_time: datetime
 
 
 class MatchResponse(MatchCreate):

@@ -10,7 +10,7 @@ class Match(Base):
 
     league = Column(String, nullable=False)
     season = Column(String, nullable=False)
-    kickoff_time = Column(String, nullable=False)
+    kickoff_time = Column(DateTime, nullable=False)
 
     home_goals = Column(Integer, nullable=True)
     away_goals = Column(Integer, nullable=True)

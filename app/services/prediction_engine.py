@@ -65,24 +65,18 @@ class PredictionEngine:
             team_id=away_team.id
         )
 
-        home_strength = (
-            home_team.attack_strength
-            * 1.15
-            * (home_team.form_score / 50)
-            * (home_team.elo_rating / 1500)
-        )
-
-        away_strength = (
-            away_team.attack_strength
-            * (away_team.form_score / 50)
-            * (away_team.elo_rating / 1500)
-        )
+        # Strength is anchored to league-average goals. Form and Elo are deliberately
+        # dampened so an excellent team does not produce unrealistic 4–5 xG forecasts.
+        home_strength = (1.35 * (home_team.attacking_strength / max(away_team.defense_strength, .5))
+                         * ((home_team.elo_rating / 1500) ** .35) * (.70 + home_team.form_score / 200) * 1.08)
+        away_strength = (1.15 * (away_team.attacking_strength / max(home_team.defense_strength, .5))
+                         * ((away_team.elo_rating / 1500) ** .35) * (.70 + away_team.form_score / 200))
 
         home_strength = home_strength * (1 - home_injury_impact / 100)
         away_strength = away_strength * (1 - away_injury_impact / 100)
 
-        expected_home_goals = round(max(home_strength * 1.35, 0.2), 2)
-        expected_away_goals = round(max(away_strength * 1.10, 0.2), 2)
+        expected_home_goals = round(min(max(home_strength, 0.2), 4.0), 2)
+        expected_away_goals = round(min(max(away_strength, 0.2), 4.0), 2)
 
         model_probabilities = PredictionEngine.calculate_match_result_probabilities(
             home_xg=expected_home_goals,

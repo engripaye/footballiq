@@ -7,7 +7,7 @@ class Prediction(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    match_id = Column(Integer, ForeignKey('matchs.id'), nullable=False)
+    match_id = Column(Integer, ForeignKey('matches.id', ondelete="CASCADE"), nullable=False, index=True)
 
     home_win_probability = Column(Float, nullable=False)
     draw_probability = Column(Float, nullable=False)
@@ -21,4 +21,4 @@ class Prediction(Base):
 
     reasoning = Column(String, nullable=False)
 
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)

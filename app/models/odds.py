@@ -6,7 +6,7 @@ class Odds(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    match_id = Column(Integer, ForeignKey("matchs.id"), nullable=False)
+    match_id = Column(Integer, ForeignKey("matches.id", ondelete="CASCADE"), nullable=False, index=True)
 
     bookmaker = Column(String, nullable=False)
     home_win_odds = Column(Float, nullable=False)
