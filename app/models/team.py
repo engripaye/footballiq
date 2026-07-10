@@ -13,4 +13,4 @@ class Team(Base):
     attacking_strength = Column(Float, default=1.0)
     defense_strength = Column(Float, default=1.0)
 
-    form_score = Column(Float, default=50_0)
+    form_score = Column(Float, default=50.0)
