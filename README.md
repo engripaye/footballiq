@@ -2,6 +2,37 @@
 
 > **AI-Powered Football Intelligence Platform** — Predicting football is easy. **Explaining football before it happens is the real innovation.**
 
+## Version 1 product contract
+
+FootballIQ now exposes a consolidated, versioned intelligence report at:
+
+```http
+GET /api/v1/intelligence/{match_id}
+```
+
+The report combines the outcome model, expected goals, explainable reasoning,
+100,000 normalized simulations, confidence components, goal markets, tactical
+profiles, injury impact, momentum, bookmaker comparisons, and a transparency
+record. Provider-free values are explicitly labelled as demo data; production
+claims must be backed by licensed feeds.
+
+### Trust rules
+
+1. A probability is never presented as certainty.
+2. Every report includes its model version and calculation method.
+3. Predictions remain publishable after kickoff so results can be settled and calibrated.
+4. Demo, stale, missing, and live data must be distinguishable in the API and UI.
+5. Bookmaker margin is removed before odds influence the model.
+
+### Practical architecture
+
+The current FastAPI service is the intelligence core. Keep ingestion, model
+training, and live-event processing as separate services when real providers are
+added. PostgreSQL should own durable football data and prediction history;
+Redis can cache reports and live probability state. Kafka, Elasticsearch,
+Kubernetes, Java/Spring, and separate ML services should be introduced only
+when traffic or team boundaries justify their operational cost.
+
 FootballIQ is an explainable AI platform designed to deliver transparent, data-driven football intelligence. Rather than simply predicting match outcomes, FootballIQ combines advanced machine learning, statistical modeling, and generative AI to explain *why* a prediction is made, quantify uncertainty, and provide actionable insights for football fans, analysts, media companies, developers, and sports businesses.
 
 The long-term vision extends beyond football—FootballIQ is being architected as a scalable **AI Sports Intelligence Platform**, capable of supporting multiple sports through a shared prediction, simulation, and explainability engine.
