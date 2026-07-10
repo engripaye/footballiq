@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Float
 from app.core.database import Base
 
 class Team(Base):
-    __tablename__ = "team"
+    __tablename__ = "teams"
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False, unique=True)
