@@ -17,6 +17,16 @@ class IntelligenceEngine:
     SIMULATIONS = 100_000
 
     @staticmethod
+    def _over_probability(mean: float, line: float) -> float:
+        max_under = math.floor(line)
+        under = sum(math.exp(-mean) * (mean ** value) / math.factorial(value) for value in range(max_under + 1))
+        return round((1 - under) * 100, 2)
+
+    @staticmethod
+    def _fair_odds(probability: float) -> float | None:
+        return round(100 / probability, 2) if probability > 0 else None
+
+    @staticmethod
     def _score_matrix(home_xg: float, away_xg: float) -> list[dict]:
         scores = []
         for home in range(7):
@@ -60,10 +70,10 @@ class IntelligenceEngine:
         odds = db.query(Odds).filter(Odds.match_id == match_id).all()
         injuries = db.query(Injury).filter(Injury.team_id.in_([home.id, away.id]), Injury.is_active.is_(True)).all()
         spread = max(prediction["home_win_probability"], prediction["away_win_probability"]) - prediction["draw_probability"]
-        agreement = round(min(98, 68 + spread / 2))
-        freshness = 96 if odds else 78
-        lineup_certainty = max(62, 95 - len(injuries) * 9)
-        historical_similarity = round(min(95, 72 + abs(home.form_score - away.form_score) / 2))
+        agreement = 0  # One production model is connected; no ensemble agreement can be claimed.
+        freshness = 90 if match.provider_id else 40
+        lineup_certainty = 0  # football-data.org does not provide confirmed lineups here.
+        historical_similarity = min(100, prediction["data_quality"]["historical_matches"])
         reliability = prediction["confidence_score"]
 
         def team_injuries(team: Team):
@@ -71,13 +81,32 @@ class IntelligenceEngine:
             return {
                 "active": len(rows),
                 "impact_score": round(sum(item.impact_score for item in rows), 1),
-                "availability": "Confirmed" if not rows else "Monitor",
-                "explanation": "No high-impact absences are recorded." if not rows else
+                "availability": "Not verified" if not rows else "Monitor",
+                "explanation": "No verified injury feed is connected; zero means no stored records, not confirmed availability." if not rows else
                     "Unavailable players reduce the team's modeled attacking and defensive strength."
             }
 
         best_home = min((o.home_win_odds for o in odds), default=None)
         worst_home = max((o.home_win_odds for o in odds), default=None)
+        total_goals = prediction["expected_home_goals"] + prediction["expected_away_goals"]
+        over_15 = cls._over_probability(total_goals, 1.5)
+        over_25 = cls._over_probability(total_goals, 2.5)
+        over_35 = cls._over_probability(total_goals, 3.5)
+        btts = round((1 - math.exp(-prediction["expected_home_goals"])) * (1 - math.exp(-prediction["expected_away_goals"])) * 100, 2)
+        expected_corners = round(max(6.0, min(14.0, 7.2 + total_goals * 1.05)), 1)
+        corners_over_85 = cls._over_probability(expected_corners, 8.5)
+        model_markets = [
+            {"market": "Match result", "selection": home.name, "probability": prediction["home_win_probability"], "fair_odds": cls._fair_odds(prediction["home_win_probability"]), "basis": "goal model"},
+            {"market": "Match result", "selection": "Draw", "probability": prediction["draw_probability"], "fair_odds": cls._fair_odds(prediction["draw_probability"]), "basis": "goal model"},
+            {"market": "Match result", "selection": away.name, "probability": prediction["away_win_probability"], "fair_odds": cls._fair_odds(prediction["away_win_probability"]), "basis": "goal model"},
+            {"market": "Both teams score", "selection": "Yes", "probability": btts, "fair_odds": cls._fair_odds(btts), "basis": "goal model"},
+            {"market": "Both teams score", "selection": "No", "probability": round(100 - btts, 2), "fair_odds": cls._fair_odds(100 - btts), "basis": "goal model"},
+            {"market": "Total goals", "selection": "Over 1.5", "probability": over_15, "fair_odds": cls._fair_odds(over_15), "basis": "goal model"},
+            {"market": "Total goals", "selection": "Over 2.5", "probability": over_25, "fair_odds": cls._fair_odds(over_25), "basis": "goal model"},
+            {"market": "Total goals", "selection": "Over 3.5", "probability": over_35, "fair_odds": cls._fair_odds(over_35), "basis": "goal model"},
+            {"market": "Total corners", "selection": "Over 8.5", "probability": corners_over_85, "fair_odds": cls._fair_odds(corners_over_85), "basis": "uncalibrated proxy"},
+            {"market": "Total corners", "selection": "Under 8.5", "probability": round(100 - corners_over_85, 2), "fair_odds": cls._fair_odds(100 - corners_over_85), "basis": "uncalibrated proxy"},
+        ]
         return {
             "match_id": match_id,
             "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -101,12 +130,14 @@ class IntelligenceEngine:
                 "most_common_scores": scores[:5],
             },
             "goals_markets": {
-                "over_2_5": round(100 * (1 - sum(math.exp(-(prediction['expected_home_goals'] + prediction['expected_away_goals']))
-                    * ((prediction['expected_home_goals'] + prediction['expected_away_goals']) ** goals) / math.factorial(goals) for goals in range(3))), 1),
-                "btts": round((1 - math.exp(-prediction["expected_home_goals"])) * (1 - math.exp(-prediction["expected_away_goals"])) * 100, 1),
-                "expected_corners": round(7.2 + (prediction["expected_home_goals"] + prediction["expected_away_goals"]) * 1.05, 1),
-                "expected_cards": 3.8,
+                "over_2_5": over_25,
+                "btts": btts,
+                "expected_corners": expected_corners,
+                "corners_over_8_5": corners_over_85,
+                "corner_model_status": "Experimental proxy — no historical corner-event feed is connected.",
+                "expected_cards": None,
             },
+            "model_markets": model_markets,
             "tactics": {
                 "home": {"team": home.name, **cls._tactical_profile(home, True)},
                 "away": {"team": away.name, **cls._tactical_profile(away, False)},
@@ -115,8 +146,8 @@ class IntelligenceEngine:
             },
             "injuries": {"home": team_injuries(home), "away": team_injuries(away)},
             "momentum": {
-                "home": {"team": home.name, "index": round(home.form_score), "trend": "Improving" if home.form_score >= 75 else "Stable"},
-                "away": {"team": away.name, "index": round(away.form_score), "trend": "Improving" if away.form_score >= 75 else "Stable"},
+                "home": {"team": home.name, "index": prediction["data_quality"]["home_form"], "trend": "Strong" if prediction["data_quality"]["home_form"] >= 70 else "Mixed"},
+                "away": {"team": away.name, "index": prediction["data_quality"]["away_form"], "trend": "Strong" if prediction["data_quality"]["away_form"] >= 70 else "Mixed"},
             },
             "odds": {
                 "bookmakers": [{"name": o.bookmaker, "home": o.home_win_odds, "draw": o.draw_odds, "away": o.away_win_odds} for o in odds],

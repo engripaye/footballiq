@@ -157,6 +157,8 @@ class PredictionEngine:
                 "historical_matches": features["league_matches"] if features else 0,
                 "home_venue_matches": features["home_venue_matches"] if features else 0,
                 "away_venue_matches": features["away_venue_matches"] if features else 0,
+                "home_form": features["home_form"] if features else round(home_team.form_score),
+                "away_form": features["away_form"] if features else round(away_team.form_score),
                 "lineups_confirmed": False,
                 "injury_data_available": False,
                 "historical_model_calibrated": False,

@@ -5,12 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b511d67b-9765-4884-8631-1a7707786f38" name="Changes" comment="frontend and backend service commit by ENGR. IPAYE">
-      <change beforePath="$PROJECT_DIR$/app/api/v1/leagues.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/leagues.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/v1/sync.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/sync.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/fixture_sync_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/fixture_sync_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/prediction_engine.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/prediction_engine.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/main.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/main.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/api/test_api.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/api/test_api.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -204,7 +199,7 @@
       <workItem from="1783611807319" duration="55000" />
       <workItem from="1783611876283" duration="7156000" />
       <workItem from="1783627997133" duration="11948000" />
-      <workItem from="1783767641616" duration="5506000" />
+      <workItem from="1783767641616" duration="7377000" />
     </task>
     <task id="LOCAL-00001" summary="commit init by ENGR. IPAYE">
       <option name="closed" value="true" />
@@ -534,7 +529,15 @@
       <option name="project" value="LOCAL" />
       <updated>1783773635205</updated>
     </task>
-    <option name="localTasksCounter" value="42" />
+    <task id="LOCAL-00042" summary="frontend and backend service commit by ENGR. IPAYE">
+      <option name="closed" value="true" />
+      <created>1783774036535</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1783774036535</updated>
+    </task>
+    <option name="localTasksCounter" value="43" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
