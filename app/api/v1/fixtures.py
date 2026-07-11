@@ -7,6 +7,7 @@ from app.core.database import get_db
 from app.models.league import League
 from app.models.match import Match
 from app.models.team import Team
+from app.services.prediction_engine import PredictionEngine
 
 router = APIRouter(prefix="/fixtures", tags=["Fixtures"])
 
@@ -15,6 +16,7 @@ router = APIRouter(prefix="/fixtures", tags=["Fixtures"])
 def get_fixtures(
     league_code: str | None = Query(default=None),
     days: int = Query(default=7, ge=1, le=30),
+    include_model: bool = Query(default=False),
     db: Session = Depends(get_db),
 ):
     home_team, away_team = aliased(Team), aliased(Team)
@@ -31,8 +33,9 @@ def get_fixtures(
     )
     if league_code:
         query = query.filter(League.provider_code == league_code.upper())
-    return [
-        {
+    fixtures = []
+    for match, league, home, away in query.all():
+        item = {
             "id": match.id, "provider_id": match.provider_id,
             "league": {"id": league.id, "name": league.name, "code": league.provider_code, "country": league.country, "emblem_url": league.emblem_url},
             "home_team": {"id": home.id, "name": home.name, "short_name": home.short_name, "abbreviation": home.abbreviation, "crest_url": home.crest_url, "country": home.country, "form_score": home.form_score},
@@ -40,5 +43,15 @@ def get_fixtures(
             "kickoff_time": match.kickoff_time, "status": match.status, "season": match.season,
             "matchday": match.matchday, "stage": match.stage, "venue": match.venue,
         }
-        for match, league, home, away in query.all()
-    ]
+        if include_model and not (home.name.startswith("TBD (") or away.name.startswith("TBD (")):
+            prediction = PredictionEngine.predict_match(db, match.id)
+            item["model_prices"] = {
+                "home": round(100 / prediction["home_win_probability"], 2),
+                "draw": round(100 / prediction["draw_probability"], 2),
+                "away": round(100 / prediction["away_win_probability"], 2),
+                "label": "FootballIQ fair odds",
+            }
+        else:
+            item["model_prices"] = None
+        fixtures.append(item)
+    return fixtures
