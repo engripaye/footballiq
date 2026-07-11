@@ -14,7 +14,7 @@ const initials=n=>n.split(' ').map(x=>x[0]).slice(0,2).join('');
 
 function App(){
  const [matches,setMatches]=useState(fallbackMatches),[selected,setSelected]=useState(null),[prediction,setPrediction]=useState(null),[menu,setMenu]=useState(false);
- useEffect(()=>{fetch(`${API}/matches/`).then(r=>r.ok?r.json():Promise.reject()).then(async rows=>{const rich=await Promise.all(rows.map(m=>fetch(`${API}/matches/${m.id}`).then(r=>r.json())));setMatches(rich)}).catch(()=>{})},[]);
+ useEffect(()=>{fetch(`${API}/fixtures/?days=30`).then(r=>r.ok?r.json():Promise.reject()).then(rows=>{if(!rows.length)throw new Error('No synchronized fixtures');return rows.map(m=>({...m,league:m.league.name}))}).then(setMatches).catch(()=>fetch(`${API}/matches/`).then(r=>r.ok?r.json():Promise.reject()).then(async rows=>{const rich=await Promise.all(rows.map(m=>fetch(`${API}/matches/${m.id}`).then(r=>r.json())));setMatches(rich)}).catch(()=>{}))},[]);
  useEffect(()=>{if(!selected)return; setPrediction(null); fetch(`${API}/intelligence/${selected.id}`).then(r=>r.ok?r.json():Promise.reject()).then(setPrediction).catch(()=>setPrediction(fallbackReport(selected)))},[selected]);
  return <><Header menu={menu} setMenu={setMenu}/>{selected?<Detail match={selected} p={prediction} back={()=>setSelected(null)}/>:<Home matches={matches} open={setSelected}/>}<Footer/></>
 }
