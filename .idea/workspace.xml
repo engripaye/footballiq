@@ -6,9 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="b511d67b-9765-4884-8631-1a7707786f38" name="Changes" comment="frontend and backend service commit by ENGR. IPAYE">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/v1/fixtures.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/fixtures.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/main.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/main.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/services/test_fixture_sync.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/services/test_fixture_sync.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -202,7 +200,7 @@
       <workItem from="1783611807319" duration="55000" />
       <workItem from="1783611876283" duration="7156000" />
       <workItem from="1783627997133" duration="11948000" />
-      <workItem from="1783767641616" duration="10535000" />
+      <workItem from="1783767641616" duration="16452000" />
     </task>
     <task id="LOCAL-00001" summary="commit init by ENGR. IPAYE">
       <option name="closed" value="true" />
@@ -564,7 +562,15 @@
       <option name="project" value="LOCAL" />
       <updated>1783781093450</updated>
     </task>
-    <option name="localTasksCounter" value="46" />
+    <task id="LOCAL-00046" summary="frontend and backend service commit by ENGR. IPAYE">
+      <option name="closed" value="true" />
+      <created>1783783502865</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1783783502865</updated>
+    </task>
+    <option name="localTasksCounter" value="47" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
