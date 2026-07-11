@@ -11,6 +11,16 @@ from app.services.fixture_sync_service import FixtureSyncService
 router = APIRouter(prefix="/sync", tags=["Data Synchronization"])
 
 
+@router.get("/status")
+def sync_status():
+    return {
+        "enabled": settings.FIXTURE_SYNC_ENABLED,
+        "provider": "football-data.org",
+        "configured": bool(settings.FOOTBALL_DATA_API_KEY),
+        "base_url": settings.FOOTBALL_DATA_BASE_URL,
+    }
+
+
 @router.post("/competitions/{competition_code}")
 def sync_competition(
     competition_code: str,

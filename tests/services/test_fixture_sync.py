@@ -30,6 +30,9 @@ def test_fixture_endpoint_returns_synced_matches(client, db_session):
     response = client.get("/api/v1/fixtures/?league_code=pl&days=7")
     assert response.status_code == 200
     assert response.json()[0]["home_team"]["name"] == "Arsenal"
+    leagues = client.get("/api/v1/leagues/")
+    assert leagues.status_code == 200
+    assert leagues.json()[0]["team_count"] == 2
 
 
 def test_sync_validates_dates_before_provider_configuration(client):

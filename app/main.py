@@ -6,8 +6,10 @@ from app.core.database import Base, engine
 from app.api.v1.routes import api_router
 import app.models.injury, app.models.league, app.models.match, app.models.odds, app.models.player, app.models.prediction, app.models.team
 from app.seed import seed_demo_data
+from app.core.schema_upgrade import upgrade_legacy_schema
 
 Base.metadata.create_all(bind=engine)
+upgrade_legacy_schema(engine)
 if settings.SEED_DEMO_DATA:
     seed_demo_data()
 

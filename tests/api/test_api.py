@@ -61,3 +61,10 @@ def test_match_list_pagination_validation(client):
     assert client.get("/api/v1/matches/?limit=0").status_code == 422
     assert client.get("/api/v1/matches/?limit=201").status_code == 422
     assert client.get("/api/v1/matches/?offset=-1").status_code == 422
+
+
+def test_provider_status_does_not_expose_api_key(client):
+    response = client.get("/api/v1/sync/status")
+    assert response.status_code == 200
+    assert response.json()["provider"] == "football-data.org"
+    assert "api_key" not in response.json()

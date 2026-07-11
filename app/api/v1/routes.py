@@ -8,6 +8,7 @@ from app.api.v1.predictions import router as predictions_router
 from app.api.v1.intelligence import router as intelligence_router
 from app.api.v1.fixtures import router as fixtures_router
 from app.api.v1.sync import router as sync_router
+from app.api.v1.leagues import router as leagues_router
 
 api_router = APIRouter(prefix="/api/v1")
 
@@ -19,3 +20,4 @@ api_router.include_router(predictions_router)
 api_router.include_router(intelligence_router)
 api_router.include_router(fixtures_router)
 api_router.include_router(sync_router)
+api_router.include_router(leagues_router)
