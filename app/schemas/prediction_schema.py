@@ -15,3 +15,4 @@ class PredictionResponse(BaseModel):
     expected_away_goals: float
 
     reasoning: list[str]
+    data_quality: dict | None = None

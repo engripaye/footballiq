@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -12,20 +11,12 @@ router = APIRouter(prefix="/leagues", tags=["Leagues"])
 
 @router.get("/")
 def get_leagues(db: Session = Depends(get_db)):
-    rows = (
-        db.query(
-            League,
-            func.count(func.distinct(Team.id)).label("team_count"),
-            func.count(func.distinct(Match.id)).label("match_count"),
-        )
-        .outerjoin(Team, Team.league_id == League.id)
-        .outerjoin(Match, Match.league_id == League.id)
-        .group_by(League.id)
-        .order_by(League.name)
-        .all()
-    )
-    return [
-        {
+    leagues = db.query(League).filter(League.is_active.is_(True)).order_by(League.name).all()
+    result = []
+    for league in leagues:
+        matches = db.query(Match).filter(Match.league_id == league.id).all()
+        team_ids = {team_id for match in matches for team_id in (match.home_team_id, match.away_team_id)}
+        result.append({
             "id": league.id,
             "provider_id": league.provider_id,
             "code": league.provider_code,
@@ -33,8 +24,7 @@ def get_leagues(db: Session = Depends(get_db)):
             "country": league.country,
             "emblem_url": league.emblem_url,
             "current_season": league.current_season,
-            "team_count": team_count,
-            "match_count": match_count,
-        }
-        for league, team_count, match_count in rows
-    ]
+            "team_count": len(team_ids),
+            "match_count": len(matches),
+        })
+    return result

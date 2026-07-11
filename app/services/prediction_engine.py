@@ -6,6 +6,7 @@ from app.models.match import Match
 from app.services.injury_engine import InjuryEngine
 from app.services.odds_engine import OddsEngine
 from app.services.reasoning_engine import ReasoningEngine
+from app.services.feature_engineering_service import FeatureEngineeringService
 
 
 class PredictionEngine:
@@ -65,7 +66,9 @@ class PredictionEngine:
             team_id=away_team.id
         )
 
-        # Strength is anchored to league-average goals. Form and Elo are deliberately
+        features = FeatureEngineeringService.build(db, match) if match.league_id else None
+
+        # Legacy/demo fallback when there is not enough historical provider data.
         # dampened so an excellent team does not produce unrealistic 4–5 xG forecasts.
         home_strength = (1.35 * (home_team.attacking_strength / max(away_team.defense_strength, .5))
                          * ((home_team.elo_rating / 1500) ** .35) * (.70 + home_team.form_score / 200) * 1.08)
@@ -75,8 +78,8 @@ class PredictionEngine:
         home_strength = home_strength * (1 - home_injury_impact / 100)
         away_strength = away_strength * (1 - away_injury_impact / 100)
 
-        expected_home_goals = round(min(max(home_strength, 0.2), 4.0), 2)
-        expected_away_goals = round(min(max(away_strength, 0.2), 4.0), 2)
+        expected_home_goals = round(features["expected_home_goals"] if features else min(max(home_strength, 0.2), 4.0), 2)
+        expected_away_goals = round(features["expected_away_goals"] if features else min(max(away_strength, 0.2), 4.0), 2)
 
         model_probabilities = PredictionEngine.calculate_match_result_probabilities(
             home_xg=expected_home_goals,
@@ -128,6 +131,14 @@ class PredictionEngine:
             expected_away_goals=expected_away_goals,
             market_probabilities=market_probabilities
         )
+        if features:
+            reasoning = [
+                f"Calculated from {features['league_matches']} completed league matches available before kickoff.",
+                f"Current Elo estimate: {home_team.name} {features['home_elo']}, {away_team.name} {features['away_elo']}.",
+                f"Last-eight points rate: {home_team.name} {features['home_form']}%, {away_team.name} {features['away_form']}%.",
+                "Expected goals combine venue scoring rates, opponent defence, Elo and recent form with small-sample shrinkage.",
+                "Confidence is limited because confirmed lineups and verified injury feeds are unavailable.",
+            ]
 
         return {
             "match_id": match_id,
@@ -138,5 +149,14 @@ class PredictionEngine:
             "risk_level": risk_level,
             "expected_home_goals": expected_home_goals,
             "expected_away_goals": expected_away_goals,
-            "reasoning": reasoning
+            "reasoning": reasoning,
+            "data_quality": {
+                "source": "football-data.org" if match.provider_id else "local_demo",
+                "historical_matches": features["league_matches"] if features else 0,
+                "home_venue_matches": features["home_venue_matches"] if features else 0,
+                "away_venue_matches": features["away_venue_matches"] if features else 0,
+                "lineups_confirmed": False,
+                "injury_data_available": False,
+                "historical_model_calibrated": False,
+            },
         }

@@ -64,7 +64,7 @@ class IntelligenceEngine:
         freshness = 96 if odds else 78
         lineup_certainty = max(62, 95 - len(injuries) * 9)
         historical_similarity = round(min(95, 72 + abs(home.form_score - away.form_score) / 2))
-        reliability = round(agreement * .35 + freshness * .25 + lineup_certainty * .2 + historical_similarity * .2)
+        reliability = prediction["confidence_score"]
 
         def team_injuries(team: Team):
             rows = [item for item in injuries if item.team_id == team.id]
@@ -82,7 +82,8 @@ class IntelligenceEngine:
             "match_id": match_id,
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "model_version": cls.MODEL_VERSION,
-            "data_status": "Demo data — connect licensed providers for production use",
+            "data_status": (f"football-data.org fixture with {prediction['data_quality']['historical_matches']} prior league results; lineups and injuries are not verified."
+                            if match.provider_id else "Local demo data — not suitable for production claims."),
             "prediction": prediction,
             "confidence": {
                 "reliability": reliability,
@@ -128,7 +129,7 @@ class IntelligenceEngine:
                 "published_probability": max(prediction["home_win_probability"], prediction["draw_probability"], prediction["away_win_probability"]),
                 "actual_result": None,
                 "settled": False,
-                "calibration_bucket": f"{int(max(prediction['confidence_score'], 50) // 10) * 10}%–{int(max(prediction['confidence_score'], 50) // 10) * 10 + 9}%",
-                "method": "Dampened Elo/form features → Poisson score model → margin-free market blend → confidence calibration",
+                "calibration_bucket": "Not calibrated",
+                "method": "Venue scoring rates + opponent defence + sequential Elo + recent form → Poisson score distribution. Historical calibration is not yet available.",
             },
         }

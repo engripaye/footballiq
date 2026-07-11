@@ -5,11 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b511d67b-9765-4884-8631-1a7707786f38" name="Changes" comment="frontend and backend service commit by ENGR. IPAYE">
+      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/v1/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/routes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/v1/sync.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/sync.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/api/test_api.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/api/test_api.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/services/test_fixture_sync.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/services/test_fixture_sync.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/leagues.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/leagues.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/prediction_schema.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/prediction_schema.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/intelligence_engine.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/intelligence_engine.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/prediction_engine.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/prediction_engine.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/main.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/main.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -203,7 +206,7 @@
       <workItem from="1783611807319" duration="55000" />
       <workItem from="1783611876283" duration="7156000" />
       <workItem from="1783627997133" duration="11948000" />
-      <workItem from="1783767641616" duration="3620000" />
+      <workItem from="1783767641616" duration="5070000" />
     </task>
     <task id="LOCAL-00001" summary="commit init by ENGR. IPAYE">
       <option name="closed" value="true" />
@@ -517,7 +520,15 @@
       <option name="project" value="LOCAL" />
       <updated>1783771535864</updated>
     </task>
-    <option name="localTasksCounter" value="40" />
+    <task id="LOCAL-00040" summary="frontend and backend service commit by ENGR. IPAYE">
+      <option name="closed" value="true" />
+      <created>1783772326243</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1783772326243</updated>
+    </task>
+    <option name="localTasksCounter" value="41" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
