@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
 from app.models.league import League
+from app.models.match import Match
 from app.services.fixture_sync_service import FixtureSyncService
 
 
@@ -33,6 +34,14 @@ def test_fixture_endpoint_returns_synced_matches(client, db_session):
     leagues = client.get("/api/v1/leagues/")
     assert leagues.status_code == 200
     assert leagues.json()[0]["team_count"] == 2
+
+
+def test_fixture_endpoint_can_filter_one_calendar_day(client, db_session):
+    FixtureSyncService(db_session, FakeProvider()).sync_competition("PL")
+    kickoff = db_session.query(Match).one().kickoff_time
+    response = client.get(f"/api/v1/fixtures/?date_on={kickoff.date().isoformat()}&include_model=true")
+    assert response.status_code == 200
+    assert len(response.json()) == 1
 
 
 def test_sync_validates_dates_before_provider_configuration(client):
