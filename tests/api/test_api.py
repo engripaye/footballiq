@@ -68,3 +68,5 @@ def test_provider_status_does_not_expose_api_key(client):
     assert response.status_code == 200
     assert response.json()["provider"] == "football-data.org"
     assert "api_key" not in response.json()
+    assert len(response.json()["free_tier_competitions"]) == 12
+    assert "WC" in response.json()["free_tier_competitions"]

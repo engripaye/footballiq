@@ -8,6 +8,12 @@ from app.models.match import Match
 from app.models.team import Team
 from app.providers.base import FootballDataProvider
 
+COMPETITION_AREAS = {
+    "PL": "England", "ELC": "England", "PD": "Spain", "BL1": "Germany",
+    "SA": "Italy", "FL1": "France", "DED": "Netherlands", "PPL": "Portugal",
+    "BSA": "Brazil", "CL": "Europe", "EC": "Europe", "WC": "World",
+}
+
 
 class FixtureSyncService:
     def __init__(self, db: Session, provider: FootballDataProvider) -> None:
@@ -19,8 +25,8 @@ class FixtureSyncService:
         counts = {"received": len(rows), "created_teams": 0, "created_matches": 0, "updated_matches": 0}
         for row in rows:
             league = self._upsert_league(row.get("competition") or {}, row.get("season") or {})
-            home, home_created = self._upsert_team(row["homeTeam"], league)
-            away, away_created = self._upsert_team(row["awayTeam"], league)
+            home, home_created = self._upsert_team(row["homeTeam"], league, fallback_provider_id=-(row["id"] * 2))
+            away, away_created = self._upsert_team(row["awayTeam"], league, fallback_provider_id=-(row["id"] * 2 + 1))
             counts["created_teams"] += int(home_created) + int(away_created)
             created = self._upsert_match(row, league, home, away)
             counts["created_matches" if created else "updated_matches"] += 1
@@ -34,20 +40,24 @@ class FixtureSyncService:
             self.db.add(league)
         area = data.get("area") or {}
         league.provider_code, league.name = data.get("code"), data.get("name", "Unknown competition")
-        league.country, league.emblem_url = area.get("name"), data.get("emblem")
+        league.country = area.get("name") or COMPETITION_AREAS.get(league.provider_code)
+        league.emblem_url = data.get("emblem")
         league.current_season = self._season_label(season)
         self.db.flush()
         return league
 
-    def _upsert_team(self, data: dict[str, Any], league: League) -> tuple[Team, bool]:
-        team = self.db.query(Team).filter(Team.provider_id == data["id"]).first()
+    def _upsert_team(self, data: dict[str, Any], league: League, fallback_provider_id: int) -> tuple[Team, bool]:
+        provider_id = data.get("id") if data.get("id") is not None else fallback_provider_id
+        name = data.get("name") or f"TBD ({abs(fallback_provider_id)})"
+        team = self.db.query(Team).filter(Team.provider_id == provider_id).first()
         created = team is None
         if team is None:
-            team = Team(provider_id=data["id"], name=data.get("name", "Unknown team"), country=league.country or "Unknown", league=league.name)
+            team = Team(provider_id=provider_id, name=name, country=league.country or "Unknown", league=league.name)
             self.db.add(team)
         team.league_id, team.league = league.id, league.name
-        team.name, team.short_name = data.get("name", "Unknown team"), data.get("shortName")
+        team.name, team.short_name = name, data.get("shortName")
         team.abbreviation, team.crest_url = data.get("tla"), data.get("crest")
+        team.country = name if league.provider_code in {"WC", "EC"} and not name.startswith("TBD (") else (league.country or team.country or "Unknown")
         self.db.flush()
         return team, created
 

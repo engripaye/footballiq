@@ -55,6 +55,8 @@ class PredictionEngine:
 
         if not home_team or not away_team:
             raise ValueError("Teams not found")
+        if home_team.name.startswith("TBD (") or away_team.name.startswith("TBD ("):
+            raise ValueError("Fixture participants are not confirmed yet")
 
         home_injury_impact = InjuryEngine.calculate_team_injury_impact(
             db=db,

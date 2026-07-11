@@ -8,6 +8,12 @@ from app.models.team import Team
 
 router = APIRouter(prefix="/leagues", tags=["Leagues"])
 
+COMPETITION_AREAS = {
+    "PL": "England", "ELC": "England", "PD": "Spain", "BL1": "Germany",
+    "SA": "Italy", "FL1": "France", "DED": "Netherlands", "PPL": "Portugal",
+    "BSA": "Brazil", "CL": "Europe", "EC": "Europe", "WC": "World",
+}
+
 
 @router.get("/")
 def get_leagues(db: Session = Depends(get_db)):
@@ -21,7 +27,7 @@ def get_leagues(db: Session = Depends(get_db)):
             "provider_id": league.provider_id,
             "code": league.provider_code,
             "name": league.name,
-            "country": league.country,
+            "country": league.country or COMPETITION_AREAS.get(league.provider_code, "International"),
             "emblem_url": league.emblem_url,
             "current_season": league.current_season,
             "team_count": len(team_ids),
