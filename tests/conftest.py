@@ -12,6 +12,7 @@ from sqlalchemy.pool import StaticPool
 
 import app.models.injury  # noqa: F401
 import app.models.match  # noqa: F401
+import app.models.league  # noqa: F401
 import app.models.odds  # noqa: F401
 import app.models.player  # noqa: F401
 import app.models.prediction  # noqa: F401

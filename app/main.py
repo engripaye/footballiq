@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.database import Base, engine
 from app.api.v1.routes import api_router
-import app.models.injury, app.models.match, app.models.odds, app.models.player, app.models.prediction, app.models.team
+import app.models.injury, app.models.league, app.models.match, app.models.odds, app.models.player, app.models.prediction, app.models.team
 from app.seed import seed_demo_data
 
 Base.metadata.create_all(bind=engine)

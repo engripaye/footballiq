@@ -1,0 +1,44 @@
+from datetime import datetime, timedelta, timezone
+
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.orm import Session, aliased
+
+from app.core.database import get_db
+from app.models.league import League
+from app.models.match import Match
+from app.models.team import Team
+
+router = APIRouter(prefix="/fixtures", tags=["Fixtures"])
+
+
+@router.get("/")
+def get_fixtures(
+    league_code: str | None = Query(default=None),
+    days: int = Query(default=7, ge=1, le=30),
+    db: Session = Depends(get_db),
+):
+    home_team, away_team = aliased(Team), aliased(Team)
+    start = datetime.now(timezone.utc)
+    if db.bind and db.bind.dialect.name == "sqlite":
+        start = start.replace(tzinfo=None)
+    query = (
+        db.query(Match, League, home_team, away_team)
+        .join(League, League.id == Match.league_id)
+        .join(home_team, home_team.id == Match.home_team_id)
+        .join(away_team, away_team.id == Match.away_team_id)
+        .filter(Match.kickoff_time >= start, Match.kickoff_time <= start + timedelta(days=days))
+        .order_by(Match.kickoff_time.asc())
+    )
+    if league_code:
+        query = query.filter(League.provider_code == league_code.upper())
+    return [
+        {
+            "id": match.id, "provider_id": match.provider_id,
+            "league": {"id": league.id, "name": league.name, "code": league.provider_code, "country": league.country, "emblem_url": league.emblem_url},
+            "home_team": {"id": home.id, "name": home.name, "short_name": home.short_name, "abbreviation": home.abbreviation, "crest_url": home.crest_url, "country": home.country, "form_score": home.form_score},
+            "away_team": {"id": away.id, "name": away.name, "short_name": away.short_name, "abbreviation": away.abbreviation, "crest_url": away.crest_url, "country": away.country, "form_score": away.form_score},
+            "kickoff_time": match.kickoff_time, "status": match.status, "season": match.season,
+            "matchday": match.matchday, "stage": match.stage, "venue": match.venue,
+        }
+        for match, league, home, away in query.all()
+    ]

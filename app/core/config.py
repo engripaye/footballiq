@@ -7,11 +7,16 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./footballiq.db"
     CORS_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173"
     SEED_DEMO_DATA: bool = True
+    FOOTBALL_DATA_API_KEY: str = ""
+    FOOTBALL_DATA_BASE_URL: str = "https://api.football-data.org/v4"
+    DEFAULT_TIMEZONE: str = "Africa/Lagos"
+    FIXTURE_SYNC_ENABLED: bool = True
 
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
-        case_sensitive=False
+        case_sensitive=False,
+        extra="ignore",
     )
 
 
