@@ -28,6 +28,7 @@ def get_fixtures(
         .join(League, League.id == Match.league_id)
         .join(home_team, home_team.id == Match.home_team_id)
         .join(away_team, away_team.id == Match.away_team_id)
+        .filter(Match.status.in_(["SCHEDULED", "TIMED"]))
         .filter(Match.kickoff_time >= start, Match.kickoff_time <= start + timedelta(days=days))
         .order_by(Match.kickoff_time.asc())
     )
@@ -53,5 +54,7 @@ def get_fixtures(
             }
         else:
             item["model_prices"] = None
+        if include_model and item["model_prices"] is None:
+            continue
         fixtures.append(item)
     return fixtures
