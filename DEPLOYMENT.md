@@ -19,6 +19,10 @@ Set these in the Render dashboard before the first live sync:
 - `VITE_API_URL`: the full public API prefix, for example
   `https://footballiq-api.onrender.com/api/v1`.
 
+The backend runtime is pinned to Python 3.12.7 through `.python-version` and
+`PYTHON_VERSION`. Python 3.14 currently forces the pinned Pydantic core package
+to compile from source on Render and must not be used for this release.
+
 Never copy the local `.env` into an image or deployment. It is excluded by both
 `.gitignore` and `.dockerignore`.
 
