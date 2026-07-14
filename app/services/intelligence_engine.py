@@ -13,7 +13,7 @@ from app.services.prediction_engine import PredictionEngine
 class IntelligenceEngine:
     """Builds one explainable, versioned match report from auditable inputs."""
 
-    MODEL_VERSION = "fiq-poisson-market-1.1"
+    MODEL_VERSION = "fiq-dixon-coles-1.2"
     SIMULATIONS = 100_000
 
     @staticmethod
@@ -25,6 +25,52 @@ class IntelligenceEngine:
     @staticmethod
     def _fair_odds(probability: float) -> float | None:
         return round(100 / probability, 2) if probability > 0 else None
+
+    @staticmethod
+    def _report_reliability(prediction: dict, freshness: int) -> int:
+        quality = prediction["data_quality"]
+        history = min(100, quality["historical_matches"] / 1.5)
+        venue_sample = min(100, min(quality["home_venue_matches"], quality["away_venue_matches"]) * 10)
+        ordered = sorted([
+            prediction["home_win_probability"], prediction["draw_probability"],
+            prediction["away_win_probability"],
+        ], reverse=True)
+        outcome_separation = min(100, 35 + (ordered[0] - ordered[1]) * 2)
+        # Provider fixture + historical results are present, while lineups,
+        # injuries and weather are deliberately scored as missing inputs.
+        input_completeness = 40 if quality["source"] == "football-data.org" else 20
+        return round(
+            history * .25 + venue_sample * .20 + freshness * .15
+            + outcome_separation * .25 + input_completeness * .15
+        )
+
+    @classmethod
+    def _conservative_lean(cls, prediction: dict, markets: dict, reliability: int) -> dict:
+        home = prediction["home_win_probability"]
+        draw = prediction["draw_probability"]
+        away = prediction["away_win_probability"]
+        candidates = [
+            ("Double chance", "Home or draw", round(home + draw, 2), "The model covers two of the three match outcomes."),
+            ("Double chance", "Away or draw", round(away + draw, 2), "The model covers two of the three match outcomes."),
+            ("Total goals", "Over 1.5", markets["over_1_5"], "The combined goal projection supports at least two goals."),
+            ("Total goals", "Under 3.5", round(100 - markets["over_3_5"], 2), "The score distribution keeps four or more goals as the less likely branch."),
+        ]
+        market, selection, probability, basis = max(candidates, key=lambda item: item[2])
+        publishable = probability >= 70 and reliability >= 45
+        return {
+            "market": market if publishable else "No strong pre-match lean",
+            "selection": selection if publishable else "Wait for stronger or fresher inputs",
+            "probability": probability if publishable else None,
+            "fair_odds": cls._fair_odds(probability) if publishable else None,
+            "risk_label": "lower model risk" if probability >= 78 and reliability >= 55 else "cautious",
+            "basis": basis if publishable else "The current evidence does not clear FootballiQ's publication threshold.",
+            "reasons": [
+                f"This selection has the highest probability among the model's conservative, calibrated goal-and-result candidates ({probability}%).",
+                f"Report reliability is {reliability}/100 after penalizing missing confirmed lineups, verified injuries and weather.",
+                "The displayed price is a margin-free model reference, not a bookmaker offer or a guarantee of profit.",
+            ],
+            "advice": "If it were my decision, I would only consider this smaller-risk lean, use a strict stake limit, and skip the match if the available price is shorter than the model fair price.",
+        }
 
     @staticmethod
     def _score_matrix(home_xg: float, away_xg: float) -> list[dict]:
@@ -69,12 +115,15 @@ class IntelligenceEngine:
         away_count = cls.SIMULATIONS - home_count - draw_count
         odds = db.query(Odds).filter(Odds.match_id == match_id).all()
         injuries = db.query(Injury).filter(Injury.team_id.in_([home.id, away.id]), Injury.is_active.is_(True)).all()
-        spread = max(prediction["home_win_probability"], prediction["away_win_probability"]) - prediction["draw_probability"]
-        agreement = 0  # One production model is connected; no ensemble agreement can be claimed.
         freshness = 90 if match.provider_id else 40
         lineup_certainty = 0  # football-data.org does not provide confirmed lineups here.
         historical_similarity = min(100, prediction["data_quality"]["historical_matches"])
-        reliability = prediction["confidence_score"]
+        reliability = cls._report_reliability(prediction, freshness)
+        ordered_outcomes = sorted([
+            prediction["home_win_probability"], prediction["draw_probability"],
+            prediction["away_win_probability"],
+        ], reverse=True)
+        outcome_separation = round(min(100, max(0, (ordered_outcomes[0] - ordered_outcomes[1]) * 3)))
 
         def team_injuries(team: Team):
             rows = [item for item in injuries if item.team_id == team.id]
@@ -95,6 +144,13 @@ class IntelligenceEngine:
         btts = round((1 - math.exp(-prediction["expected_home_goals"])) * (1 - math.exp(-prediction["expected_away_goals"])) * 100, 2)
         expected_corners = round(max(6.0, min(14.0, 7.2 + total_goals * 1.05)), 1)
         corners_over_85 = cls._over_probability(expected_corners, 8.5)
+        market_probabilities = {
+            "over_1_5": over_15,
+            "over_2_5": over_25,
+            "over_3_5": over_35,
+            "btts": btts,
+        }
+        conservative_lean = cls._conservative_lean(prediction, market_probabilities, reliability)
         model_markets = [
             {"market": "Match result", "selection": home.name, "probability": prediction["home_win_probability"], "fair_odds": cls._fair_odds(prediction["home_win_probability"]), "basis": "goal model"},
             {"market": "Match result", "selection": "Draw", "probability": prediction["draw_probability"], "fair_odds": cls._fair_odds(prediction["draw_probability"]), "basis": "goal model"},
@@ -104,6 +160,9 @@ class IntelligenceEngine:
             {"market": "Total goals", "selection": "Over 1.5", "probability": over_15, "fair_odds": cls._fair_odds(over_15), "basis": "goal model"},
             {"market": "Total goals", "selection": "Over 2.5", "probability": over_25, "fair_odds": cls._fair_odds(over_25), "basis": "goal model"},
             {"market": "Total goals", "selection": "Over 3.5", "probability": over_35, "fair_odds": cls._fair_odds(over_35), "basis": "goal model"},
+            {"market": "Total goals", "selection": "Under 3.5", "probability": round(100 - over_35, 2), "fair_odds": cls._fair_odds(100 - over_35), "basis": "goal model"},
+            {"market": "Double chance", "selection": "Home or draw", "probability": round(prediction["home_win_probability"] + prediction["draw_probability"], 2), "fair_odds": cls._fair_odds(prediction["home_win_probability"] + prediction["draw_probability"]), "basis": "Dixon-Coles result model"},
+            {"market": "Double chance", "selection": "Away or draw", "probability": round(prediction["away_win_probability"] + prediction["draw_probability"], 2), "fair_odds": cls._fair_odds(prediction["away_win_probability"] + prediction["draw_probability"]), "basis": "Dixon-Coles result model"},
             {"market": "Total corners", "selection": "Over 8.5", "probability": corners_over_85, "fair_odds": cls._fair_odds(corners_over_85), "basis": "uncalibrated proxy"},
             {"market": "Total corners", "selection": "Under 8.5", "probability": round(100 - corners_over_85, 2), "fair_odds": cls._fair_odds(100 - corners_over_85), "basis": "uncalibrated proxy"},
         ]
@@ -116,7 +175,8 @@ class IntelligenceEngine:
             "prediction": prediction,
             "confidence": {
                 "reliability": reliability,
-                "model_agreement": agreement,
+                "model_agreement": 0,
+                "outcome_separation": outcome_separation,
                 "historical_similarity": historical_similarity,
                 "data_freshness": freshness,
                 "lineup_certainty": lineup_certainty,
@@ -138,6 +198,7 @@ class IntelligenceEngine:
                 "expected_cards": None,
             },
             "model_markets": model_markets,
+            "conservative_lean": conservative_lean,
             "tactics": {
                 "home": {"team": home.name, **cls._tactical_profile(home, True)},
                 "away": {"team": away.name, **cls._tactical_profile(away, False)},
@@ -161,6 +222,6 @@ class IntelligenceEngine:
                 "actual_result": None,
                 "settled": False,
                 "calibration_bucket": "Not calibrated",
-                "method": "Venue scoring rates + opponent defence + sequential Elo + recent form → Poisson score distribution. Historical calibration is not yet available.",
+                "method": "Pre-kickoff venue scoring rates + opponent defence + sequential Elo + last-eight form → sample-size shrinkage → Dixon–Coles low-score correction → normalized probabilities and margin-free fair prices. Historical calibration is not yet available.",
             },
         }

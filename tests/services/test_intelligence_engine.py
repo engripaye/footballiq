@@ -7,7 +7,8 @@ def test_intelligence_report_contains_every_core_module(db_session, match_data):
     report = IntelligenceEngine.build_report(db_session, match_data["match"].id)
     required = {
         "prediction", "confidence", "simulation", "goals_markets",
-        "tactics", "injuries", "momentum", "odds", "model_markets", "transparency",
+        "tactics", "injuries", "momentum", "odds", "model_markets",
+        "conservative_lean", "transparency",
     }
     assert required.issubset(report)
     assert report["model_version"]
@@ -28,6 +29,17 @@ def test_confidence_and_market_percentages_are_valid(db_session, match_data):
     assert 0 <= report["goals_markets"]["over_2_5"] <= 100
     assert 0 <= report["goals_markets"]["corners_over_8_5"] <= 100
     assert all(item["fair_odds"] > 1 for item in report["model_markets"])
+    assert 0 <= report["confidence"]["outcome_separation"] <= 100
+
+
+def test_conservative_lean_is_thresholded_and_explained(db_session, match_data):
+    report = IntelligenceEngine.build_report(db_session, match_data["match"].id)
+    lean = report["conservative_lean"]
+    assert lean["reasons"]
+    assert "guarantee" in lean["reasons"][-1].lower()
+    if lean["probability"] is not None:
+        assert lean["probability"] >= 70
+        assert lean["fair_odds"] == pytest.approx(100 / lean["probability"], abs=0.01)
 
 
 def test_score_matrix_is_sorted_and_normalized():

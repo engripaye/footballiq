@@ -22,6 +22,12 @@ def test_stronger_home_team_is_favoured():
     assert result["home"] > result["draw"] > result["away"]
 
 
+def test_low_score_correction_keeps_probabilities_normalized():
+    result = PredictionEngine.calculate_match_result_probabilities(0.72, 0.64)
+    assert sum(result.values()) == pytest.approx(100, abs=0.02)
+    assert result["draw"] > 30
+
+
 def test_predict_match_returns_explainable_result(db_session, match_data):
     result = PredictionEngine.predict_match(db_session, match_data["match"].id)
     total = result["home_win_probability"] + result["draw_probability"] + result["away_win_probability"]

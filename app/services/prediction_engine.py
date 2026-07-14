@@ -17,16 +17,31 @@ class PredictionEngine:
 
     @staticmethod
     def calculate_match_result_probabilities(home_xg: float, away_xg: float):
+        """Return normalized 1X2 probabilities using a Dixon-Coles adjustment.
+
+        The low-score correction reduces the independence bias of a plain
+        Poisson model around 0-0, 1-0, 0-1 and 1-1. The grid is deliberately
+        extended to ten goals so high-scoring tail mass is not discarded.
+        """
         home_win = 0
         draw = 0
         away_win = 0
+        rho = -0.08
 
-        for home_goals in range(0, 6):
-            for away_goals in range(0, 6):
+        for home_goals in range(0, 11):
+            for away_goals in range(0, 11):
                 probability = (
                     PredictionEngine.poisson_probability(home_xg, home_goals)
                     * PredictionEngine.poisson_probability(away_xg, away_goals)
                 )
+                if home_goals == 0 and away_goals == 0:
+                    probability *= 1 - (home_xg * away_xg * rho)
+                elif home_goals == 0 and away_goals == 1:
+                    probability *= 1 + (home_xg * rho)
+                elif home_goals == 1 and away_goals == 0:
+                    probability *= 1 + (away_xg * rho)
+                elif home_goals == 1 and away_goals == 1:
+                    probability *= 1 - rho
 
                 if home_goals > away_goals:
                     home_win += probability
@@ -136,10 +151,12 @@ class PredictionEngine:
         if features:
             reasoning = [
                 f"Calculated from {features['league_matches']} completed league matches available before kickoff.",
-                f"Current Elo estimate: {home_team.name} {features['home_elo']}, {away_team.name} {features['away_elo']}.",
-                f"Last-eight points rate: {home_team.name} {features['home_form']}%, {away_team.name} {features['away_form']}%.",
-                "Expected goals combine venue scoring rates, opponent defence, Elo and recent form with small-sample shrinkage.",
-                "Confidence is limited because confirmed lineups and verified injury feeds are unavailable.",
+                f"Current sequential Elo: {home_team.name} {features['home_elo']} and {away_team.name} {features['away_elo']} ({abs(features['home_elo'] - features['away_elo'])} points apart).",
+                f"Last-eight points rate: {home_team.name} {features['home_form']}% from {features['home_recent_matches']} matches; {away_team.name} {features['away_form']}% from {features['away_recent_matches']}.",
+                f"Venue evidence: {home_team.name} average {features['home_goals_for']} scored and {features['home_goals_against']} conceded at home; {away_team.name} average {features['away_goals_for']} scored and {features['away_goals_against']} conceded away.",
+                f"Expected-goal projection is {expected_home_goals}–{expected_away_goals}; it blends league scoring rates, opponent defence, Elo and recent form with sample-size shrinkage.",
+                f"A Dixon–Coles low-score correction converts that goal projection into {home_probability}% home, {draw_probability}% draw and {away_probability}% away.",
+                "No confirmed-lineup, verified injury or weather feed is connected, so these missing inputs reduce report reliability and can change the pre-kickoff view.",
             ]
 
         return {
@@ -157,6 +174,10 @@ class PredictionEngine:
                 "historical_matches": features["league_matches"] if features else 0,
                 "home_venue_matches": features["home_venue_matches"] if features else 0,
                 "away_venue_matches": features["away_venue_matches"] if features else 0,
+                "home_recent_matches": features["home_recent_matches"] if features else 0,
+                "away_recent_matches": features["away_recent_matches"] if features else 0,
+                "home_elo": features["home_elo"] if features else round(home_team.elo_rating),
+                "away_elo": features["away_elo"] if features else round(away_team.elo_rating),
                 "home_form": features["home_form"] if features else round(home_team.form_score),
                 "away_form": features["away_form"] if features else round(away_team.form_score),
                 "lineups_confirmed": False,

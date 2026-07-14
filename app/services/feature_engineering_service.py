@@ -28,19 +28,20 @@ class FeatureEngineeringService:
         league_home = max(league_home, 0.5)
         league_away = max(league_away, 0.5)
 
-        def venue_stats(team_id: int, home: bool) -> tuple[int, float, float]:
+        def venue_stats(team_id: int, home: bool) -> tuple[int, float, float, float, float]:
             rows = [row for row in completed if (row.home_team_id if home else row.away_team_id) == team_id]
             if not rows:
-                return 0, 1.0, 1.0
+                return 0, 1.0, 1.0, 0.0, 0.0
             scored = sum(row.home_goals if home else row.away_goals for row in rows) / len(rows)
             conceded = sum(row.away_goals if home else row.home_goals for row in rows) / len(rows)
             attack_base = league_home if home else league_away
             conceded_base = league_away if home else league_home
             weight = len(rows) / (len(rows) + 5)
-            return len(rows), 1 + (scored / attack_base - 1) * weight, 1 + (conceded / conceded_base - 1) * weight
+            return (len(rows), 1 + (scored / attack_base - 1) * weight,
+                    1 + (conceded / conceded_base - 1) * weight, scored, conceded)
 
-        home_n, home_attack, home_defense = venue_stats(match.home_team_id, True)
-        away_n, away_attack, away_defense = venue_stats(match.away_team_id, False)
+        home_n, home_attack, home_defense, home_scored, home_conceded = venue_stats(match.home_team_id, True)
+        away_n, away_attack, away_defense, away_scored, away_conceded = venue_stats(match.away_team_id, False)
 
         ratings: dict[int, float] = {}
         for row in completed:
@@ -78,5 +79,9 @@ class FeatureEngineeringService:
             "away_venue_matches": away_n,
             "home_recent_matches": home_recent_n,
             "away_recent_matches": away_recent_n,
+            "home_goals_for": round(home_scored, 2),
+            "home_goals_against": round(home_conceded, 2),
+            "away_goals_for": round(away_scored, 2),
+            "away_goals_against": round(away_conceded, 2),
             "league_matches": len(completed),
         }

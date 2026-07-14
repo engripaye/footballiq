@@ -60,7 +60,7 @@ def get_fixtures(
                 "home": round(100 / prediction["home_win_probability"], 2),
                 "draw": round(100 / prediction["draw_probability"], 2),
                 "away": round(100 / prediction["away_win_probability"], 2),
-                "label": "FootballIQ fair odds",
+                "label": "FootballiQ fair odds",
             }
         else:
             item["model_prices"] = None
