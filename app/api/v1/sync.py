@@ -7,6 +7,8 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.providers.football_data_provider import FootballDataOrgProvider
 from app.services.fixture_sync_service import FixtureSyncService
+from app.models.league import League
+from app.models.match import Match
 
 router = APIRouter(prefix="/sync", tags=["Data Synchronization"])
 
@@ -14,13 +16,17 @@ FREE_TIER_COMPETITIONS = ("CL", "PPL", "PL", "DED", "BL1", "FL1", "SA", "PD", "E
 
 
 @router.get("/status")
-def sync_status():
+def sync_status(db: Session = Depends(get_db)):
     return {
         "enabled": settings.FIXTURE_SYNC_ENABLED,
         "provider": "football-data.org",
         "configured": bool(settings.FOOTBALL_DATA_API_KEY),
         "base_url": settings.FOOTBALL_DATA_BASE_URL,
         "free_tier_competitions": list(FREE_TIER_COMPETITIONS),
+        "database_engine": db.bind.dialect.name if db.bind else "unknown",
+        "synchronized_leagues": db.query(League).count(),
+        "stored_matches": db.query(Match).count(),
+        "bootstrap_enabled": settings.AUTO_SYNC_ON_STARTUP,
     }
 
 

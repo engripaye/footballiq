@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b511d67b-9765-4884-8631-1a7707786f38" name="Changes" comment="frontend and backend service commit by ENGR. IPAYE" />
+    <list default="true" id="b511d67b-9765-4884-8631-1a7707786f38" name="Changes" comment="frontend and backend service commit by ENGR. IPAYE">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -198,7 +200,7 @@
       <workItem from="1783611876283" duration="7156000" />
       <workItem from="1783627997133" duration="11948000" />
       <workItem from="1783767641616" duration="17021000" />
-      <workItem from="1783885512939" duration="9471000" />
+      <workItem from="1783885512939" duration="11419000" />
     </task>
     <task id="LOCAL-00001" summary="commit init by ENGR. IPAYE">
       <option name="closed" value="true" />
@@ -584,7 +586,15 @@
       <option name="project" value="LOCAL" />
       <updated>1784044262443</updated>
     </task>
-    <option name="localTasksCounter" value="49" />
+    <task id="LOCAL-00049" summary="frontend and backend service commit by ENGR. IPAYE">
+      <option name="closed" value="true" />
+      <created>1784045690314</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1784045690314</updated>
+    </task>
+    <option name="localTasksCounter" value="50" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     FOOTBALL_DATA_BASE_URL: str = "https://api.football-data.org/v4"
     DEFAULT_TIMEZONE: str = "Africa/Lagos"
     FIXTURE_SYNC_ENABLED: bool = True
+    AUTO_SYNC_ON_STARTUP: bool = False
+    SYNC_REQUEST_DELAY_SECONDS: float = 6.5
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -70,3 +70,6 @@ def test_provider_status_does_not_expose_api_key(client):
     assert "api_key" not in response.json()
     assert len(response.json()["free_tier_competitions"]) == 12
     assert "WC" in response.json()["free_tier_competitions"]
+    assert response.json()["database_engine"] == "sqlite"
+    assert response.json()["synchronized_leagues"] >= 0
+    assert response.json()["stored_matches"] >= 0
